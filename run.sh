@@ -1,5 +1,4 @@
 #!/bin/sh
-pwd
 pkg=sshpass
 status="$(dpkg-query -W --showformat='${db:Status-Status}' "$pkg" 2>&1)"
 if [ ! $? = 0 ] || [ ! "$status" = installed ] ; then
@@ -7,22 +6,21 @@ echo "sshpass is not found installing">sshpass
 sudo apt install $pkg
 echo "sshpass installed">sshpass
 fi
+mkdir -p autoscript
+mkdir -p data
+mkdir -p scripts
+mkdir -p errorlog
+mkdir -p  autoscript/temperature
 file=data/usr_status
 if [ -f $file ]; then
-echo "data found found"
+echo "welcome"
 else
 echo "status:0" > data/usr_status
 fi
 if [ `cat $file` = "status:0" ]; then
 echo "on" > data/mousekeybord
 echo "on" > data/sound
-mkdir autoscript
-mkdir data
-mkdir scripts
-mkdir errorlog
-mkdir autoscript/temperature
-echo "welcome"
-echo " enter the username :>"
+echo "enter the username :>"
 read usr
 echo "$usr" > data/usr
 echo "enter the targeted ip :>"
@@ -59,7 +57,6 @@ fi
 fi
 done
 echo "-$direction">data/direction
-
 echo "enter the password ( $id ) :"
 read password
 echo "$password" > data/password
@@ -72,8 +69,6 @@ sleep 10
 sshpass -p $password ssh -t $id "sudo sh scripts/p_checker.sh" 
 echo "status:1" > data/usr_status
 fi
-echo "continue"
-echo "not a new user"
 sleep 10
 while :
 do
@@ -112,7 +107,6 @@ if [ "$input" = "t" ]; then
 if [ -z "$(pgrep -f t_checker.sh)" ]; then
 echo "processing.."
 else
-
 kill -9 $(pgrep -f t_checker.sh)
 fi
 sleep 10
@@ -207,7 +201,6 @@ fi
 done
 echo "-$direction" > data/direction
 else
-
 echo "off" > data/mousekeybord
 fi
 echo "sound transfer (off/on)"
@@ -216,7 +209,6 @@ if [ "$sound" = "on" ]; then
 echo "enable"
 echo "on">data/sound
 else
-
 echo "off">data/sound  
 fi
 clear
@@ -233,15 +225,12 @@ echo "press any key to continue"
 sleep 1
 read pass
 if [ "$pass" != "q" ]; then
-
-
 break
 fi
 done
 fi
 if [ "$input" = "p" ]; then
 ping -c 5 $ip
-
 while :
 do
 echo "press any key to continue"
@@ -262,12 +251,8 @@ echo "mouse and keybord switching :> $mousekeybord"
 echo "sound transfer :>              $sound"
 echo "+----------------------------------------------+"
 sleep 1
-
-
 echo "ssh -YC $id x2x $direction -to :0.0" > autoscript/ssh_mouse_key.sh
-
 echo "ssh $id arecord - | aplay -" > autoscript/ssh_sound.sh
-
 if [ "$mousekeybord" = "on" ]; then
 while :
 do
@@ -280,7 +265,6 @@ fi
 done
 sshpass -p  'akku' sh autoscript/ssh_mouse_key.sh > errorlog/mouse_out 2>&1 &
 sleep 5
-
 else
 echo "mouse,keybord sharing off(turn on form update for enabling them)"
 fi
@@ -311,7 +295,6 @@ if [ "$pass" != "q" ]; then
 break
 fi
 done
-
 fi
 else
 exit
