@@ -60,13 +60,14 @@ echo "-$direction">data/direction
 echo "enter the password ( $id ) :"
 read password
 echo "$password" > data/password
+sshpass -p $password ssh -t $id "mkdir pkg_script" 
 echo "transfering script to user ($id)"
 sleep 3
-sshpass -p $password scp scripts/p_checker.sh $id:/home/akku/
+sshpass -p $password scp scripts/p_checker.sh $id:/home/akku/pkg_script
 echo "finished transferip_ng script"
 echo "checking for packages in remote system" 
 sleep 10
-sshpass -p $password ssh -t $id "sudo sh scripts/p_checker.sh" 
+sshpass -p $password ssh -t $id "sh pkg_script/p_checker.sh" 
 echo "status:1" > data/usr_status
 fi
 sleep 10
@@ -78,6 +79,7 @@ echo " "
 ip=`cat data/ip`
 usr=`cat data/usr`
 id=`cat data/id`
+password=`cat data/password`
 mousekeybord=`cat data/mousekeybord`
 sound=`cat data/sound`
 direction=`cat data/direction`
@@ -111,7 +113,6 @@ kill -9 $(pgrep -f t_checker.sh)
 fi
 sleep 10
 sh scripts/t_checker.sh &
-sleep 10
 while :
 do
 clear
@@ -215,9 +216,9 @@ clear
 echo "+----------------------------------------------+"
 echo "                    updated data               "
 echo "+----------------------------------------------+"
-echo "ssh service :> $id"
+echo "ssh service :>                 $id"
 echo "mouse and keybord switching :> $mousekeybord"
-echo "sound transfer :> $sound"
+echo "sound transfer :>              $sound"
 echo "+----------------------------------------------+"
 while :
 do
@@ -246,10 +247,35 @@ clear
 echo "+----------------------------------------------+"
 echo "                     view                       "
 echo "+----------------------------------------------+"
-echo "ssh service :>                 $usr @ $ip"
+echo "ssh service :>                 $id"
 echo "mouse and keybord switching :> $mousekeybord"
 echo "sound transfer :>              $sound"
 echo "+----------------------------------------------+"
+echo "checking for requirement packages in the remote system"
+sleep 3
+sshpass -p $password ssh $id "cat pkg_script/alsa" > data/package_status_1
+sshpass -p $password ssh $id "cat pkg_script/x2x" > data/package_status_2
+package_status_1=`cat data/package_status_1`
+package_status_2=`cat data/package_status_2`
+
+echo "$package_status_2"
+
+if [ "$package_status_1" = "not x2x installed" ]; then
+cat data/package_status_1
+
+fi
+
+
+echo "" 
+
+if [ "$package_status_2" = "alsa-utils not installed" ]; then
+cat data/package_status_2
+
+fi
+
+
+
+
 sleep 1
 echo "ssh -YC $id x2x $direction -to :0.0" > autoscript/ssh_mouse_key.sh
 echo "ssh $id arecord - | aplay -" > autoscript/ssh_sound.sh
@@ -278,7 +304,7 @@ if [ "$pass" = "y" ]; then
 break
 fi
 done
-sshpass -p  'akku' sh autoscript/ssh_sound.sh > errorlog/km_error_eout 2>&1 &
+sshpass -p  'akku' sh autoscript/ssh_sound.sh > errorlog/km_error_out 2>&1 &
 sleep 5
 else
 echo "sound sharing off(turn on form update for enabling them)"
