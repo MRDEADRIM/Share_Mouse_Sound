@@ -168,6 +168,9 @@ echo "ip :>"
 read ip
 echo "$usr">data/usr
 echo "$ip">data/ip
+id="$usr@$ip"
+echo "$id" > data/id
+
 echo "mouse and keybord (off/on)"
 read mousekeybord
 if [ "$mousekeybord" = "on" ]; then
@@ -243,35 +246,48 @@ fi
 done
 fi
 if [ "$input" = "s" ]; then
+
+echo "checking for requirement packages in the remote system"
+sleep 3
+sshpass -p $password ssh $id "cat pkg_script/x2x" > data/package_status_1
+sshpass -p $password ssh $id "cat pkg_script/alsa" > data/package_status_2
+package_status_1=`cat data/package_status_1`
+package_status_2=`cat data/package_status_2`
 clear
 echo "+----------------------------------------------+"
 echo "                     view                       "
 echo "+----------------------------------------------+"
-echo "ssh service :>                 $id"
-echo "mouse and keybord switching :> $mousekeybord"
-echo "sound transfer :>              $sound"
-echo "+----------------------------------------------+"
-echo "checking for requirement packages in the remote system"
-sleep 3
-sshpass -p $password ssh $id "cat pkg_script/alsa" > data/package_status_1
-sshpass -p $password ssh $id "cat pkg_script/x2x" > data/package_status_2
-package_status_1=`cat data/package_status_1`
-package_status_2=`cat data/package_status_2`
+echo "ssh service :>                    $id"
+echo "mouse and keybord switching :>    $mousekeybord"
+echo "sound transfer :>                 $sound"
 
-echo "$package_status_2"
-
+echo -n "x2x status on remote sys:>        "
 if [ "$package_status_1" = "not x2x installed" ]; then
-cat data/package_status_1
-
+echo  "$package_status_1"
+else
+echo "$package_status_1"
 fi
 
+echo -n "alsa-utils status on remote sys:> "
 
-echo "" 
 
 if [ "$package_status_2" = "alsa-utils not installed" ]; then
-cat data/package_status_2
+echo "$package_status_2";
+else
 
+echo "$package_status_2";
 fi
+
+
+echo "+----------------------------------------------+"
+
+
+
+
+
+
+
+
 
 
 
@@ -289,7 +305,7 @@ if [ "$pass" = "y" ]; then
 break
 fi
 done
-sshpass -p  'akku' sh autoscript/ssh_mouse_key.sh > errorlog/mouse_out 2>&1 &
+sshpass -p $password sh autoscript/ssh_mouse_key.sh > errorlog/mouse_out 2>&1 &
 sleep 5
 else
 echo "mouse,keybord sharing off(turn on form update for enabling them)"
@@ -304,7 +320,7 @@ if [ "$pass" = "y" ]; then
 break
 fi
 done
-sshpass -p  'akku' sh autoscript/ssh_sound.sh > errorlog/km_error_out 2>&1 &
+sshpass -p $password sh autoscript/ssh_sound.sh > errorlog/km_error_out 2>&1 &
 sleep 5
 else
 echo "sound sharing off(turn on form update for enabling them)"
