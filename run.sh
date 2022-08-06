@@ -55,6 +55,8 @@ if [ $(cat $file) = "status:0" ]; then
             fi
         fi
     done
+
+    
     echo "-$direction" >data/direction
     echo "enter the password ( $id ) :"
     read password
